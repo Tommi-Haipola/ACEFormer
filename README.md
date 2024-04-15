@@ -39,8 +39,8 @@ Commands for training and testing the model with *ACEFormer* on Dataset NDX100.c
 
 ```bash
 # NDX100 
-python ACEFormer.py cuda:0 5 ./result ./data/NDX100.csv 1 2000 ["close","vol","close_x","close_y","vol_x","vol_y"] ["close"]
+python ACEFormer.py cuda:0 5 ./result ./data/NDX100.csv 1 2000 "close,vol,close_x,close_y,vol_x,vol_y" "close"
 
 # SPY500.csv
-python ACEFormer.py cuda:0 5 ./result ./data/SPY100.csv 1 2000 ["close","vol","close_x","close_y","vol_x","vol_y"] ["close"]
+python ACEFormer.py cuda:0 5 ./result ./data/SPY100.csv 1 2000 "close,vol,close_x,close_y,vol_x,vol_y" "close"
 ```

@@ -240,9 +240,9 @@ if __name__ == "__main__":
     # iteration number
     itera_num = int(sys.argv[6])
     #emd keys
-    emd_keys = sys.argv[7]
+    emd_keys = sys.argv[7].split(',')
     #prediction keys
-    prediction_keys = sys.argv[8]
+    prediction_keys = sys.argv[8].split(',')
     # path of save result
     result_path = result_save + "result_set_" + data_path[10:-4] + "_{}.npy"
 

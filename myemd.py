@@ -232,7 +232,7 @@ def aceemd(extsignal, midsignal, alpha = 0.5):
         #return signal, signal
     return ext_up_envelopes * (1-alpha) + mid_up_envelopes * alpha, ext_down_envelopes * (1-alpha) + mid_down_envelopes * alpha
 
-# Assuming noise is a list of Gaussian noise samples
+# Assuming noise is a sample of gaussian noise
 def snr(data, noise):
   """
   This function calculates the SNR (Signal-to-Noise Ratio) by adding the first 
@@ -258,3 +258,48 @@ def snr(data, noise):
   data_with_noise = data + imf1
 
   return data_with_noise
+
+
+#calculate ACEEMD from base signal (includes snr)
+def ACEEMD_Base(source_data,imf_times=10,emd_type=0,alpha=0.5):
+
+    #  Gaussian noise
+    noise_list = []
+    win_len = signal.shape[-2]
+    for _ in range(imf_times // 2):
+        noise = np.random.randn(win_len)
+        n_up_envelopes, n_down_envelopes =  emd(noise)
+        noise_list.append((n_up_envelopes + n_down_envelopes) / 2 / np.std(noise))
+
+        n_up_envelopes, n_down_envelopes = emd(-noise)
+        noise_list.append((n_up_envelopes + n_down_envelopes) / 2 / np.std(-noise))
+
+    # emd process
+    emd_result = []
+    for s in range(len(source_data)):
+        emd_tmp = []
+        for d in range(len(source_data[s].T)):
+            _data = (source_data[s].T)[d]
+            # envelope line
+            up_list, down_list = [], []
+            # iceemd & eceemd
+            if emd_type == 1 or emd_type == 2:
+                for noise in noise_list:
+                    _emd_data = _data.copy() + noise * snr(_data, noise)
+                    up, down = emd(_emd_data) if emd_type == 1 else extemd(_emd_data)
+
+                    up_list.append(up)
+                    down_list.append(down)
+            # aceemd
+            else:
+                for i in range(imf_times // 2):
+                    _exemd_data = _data.copy() + noise_list[2*i] * snr(_data, noise_list[2*i])
+                    _acemd_data = _data.copy() + noise_list[2*i+1] * snr(_data, noise_list[2*i+1])
+                    up, down = aceemd(_exemd_data, _acemd_data, alpha)
+
+                    up_list.append(up)
+                    down_list.append(down)
+            # denoise
+            emd_tmp.append((np.array(up_list).mean(axis=0) + np.array(down_list).mean(axis=0)) / 2)
+        emd_result.append(np.array(emd_tmp).T)
+    return emd_result

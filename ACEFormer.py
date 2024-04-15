@@ -186,7 +186,7 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
 
     # create model
     print("create model")
-    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=32, unit_size=64, dis_layer=3, attn_layer=1, dropout=0.1, factor=5).to(device)
+    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=32, unit_size=64, dis_layer=3, attn_layer=1  , dropout=0.1, factor=5).to(device)
 
     train_true_set, train_predict_set = [], []
     verify_true_set, verify_predict_set = [], []

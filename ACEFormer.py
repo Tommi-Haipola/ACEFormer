@@ -172,12 +172,12 @@ def test(model, test_data: EmdData, predict_size: int, device: str):
     true, predict = test_data.anti_normalize_data(np.array(true), np.array(predict))
     return true, predict
 
-def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: int, iteration: int, save_path: str):
+def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: int, iteration: int, save_path: str,emd_keys: list, prediction_keys: list):
     print("Start experiment index : " + str(index) + " ......")
     # hyper parameter
     batch_size = 64
-    emd_col = ['close', 'close_x', 'close_y', 'vol', 'vol_x', 'vol_y']
-    result_col = ['close']
+    emd_col = emd_keys
+    result_col = prediction_keys
 
     start_time = time.time()
     # product dataset for model
@@ -239,16 +239,25 @@ if __name__ == "__main__":
     back_num = int(sys.argv[5])
     # iteration number
     itera_num = int(sys.argv[6])
+    #emd keys
+    emd_keys = sys.argv[7]
+    #prediction keys
+    prediction_keys = sys.argv[8]
     # path of save result
     result_path = result_save + "result_set_" + data_path[10:-4] + "_{}.npy"
 
+    #source data
+    source_data = pd.read_csv(data_path)
+
     # multiplt processing
+    #'''
     pool = multiprocessing.Pool(model_time)
     source_data = pd.read_csv(data_path)
     for model_i in range(1, model_time + 1):
-        pool.apply_async(run_model, (source_data, model_i, dev, back_num, itera_num, result_path))
+        pool.apply_async(run_model, (source_data, model_i, dev, back_num, itera_num, result_path,emd_keys,prediction_keys))
 
     pool.close()
     pool.join()
+    #'''
     
     print("Finish training all experment models.")

@@ -5,7 +5,6 @@ import torch.optim as opt
 import torch.utils.data as Data
 import numpy as np
 import pandas as pd
-import os
 import sys
 import multiprocessing
 from moduledata import EmdData
@@ -85,7 +84,7 @@ class ACEFormer(nn.Module):
                 )
             )
             self.distill.append(Distilling(embed_tmp))
-            self.hidden_local.append(nn.Linear(unit_size, embed_tmp // 2))
+            #self.hidden_local.append(nn.Linear(unit_size, embed_tmp // 2))
 
         # attention module
         self.attn = nn.ModuleList(
@@ -150,7 +149,7 @@ def train(model, train_data: Data.Dataset, batch_size: int, device: str = "cpu",
             loss.backward()
             optimizer.step()
 
-        if epoch % 100 == 0:
+        if epoch % 1 == 0:
             end = time.time()
             print("epoch=" + str(epoch) + ", loss=" + str(loss_count/batch_count) + ", use time=" + str(int(end - start)) + "s, in " + time.strftime("%m-%d %H:%M:%S", time.localtime()) + ", predict next epoch in " + time.strftime("%m-%d %H:%M:%S", time.localtime(time.time() + end - start)))
             start = time.time()
@@ -187,7 +186,7 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
 
     # create model
     print("create model")
-    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=256, unit_size=30, dis_layer=3, attn_layer=2, dropout=0.1, factor=5).to(device)
+    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=16, unit_size=10, dis_layer=1, attn_layer=1, dropout=0.1, factor=2).to(device)
 
     train_true_set, train_predict_set = [], []
     verify_true_set, verify_predict_set = [], []
@@ -224,6 +223,8 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
     
     print("Save result to " + save_path.format(index) + ", spend time " + str((time.time() - start_time) // 60 // 60) + "h " + str((time.time() - start_time) // 60 % 60) + "min.")
 
+    torch.save(model,save_path)
+
 if __name__ == "__main__":
     print('args : ', sys.argv)
     print('script name : ', sys.argv[0])
@@ -244,13 +245,15 @@ if __name__ == "__main__":
     #prediction keys
     prediction_keys = sys.argv[8].split(',')
     # path of save result
-    result_path = result_save + "result_set_" + data_path[10:-4] + "_{}.npy"
+    result_path = result_save
 
     #source data
     source_data = pd.read_csv(data_path)
 
+    run_model(source_data,0,dev,back_num,itera_num,result_path,emd_keys,prediction_keys)
+
     # multiplt processing
-    #'''
+    '''
     pool = multiprocessing.Pool(model_time)
     source_data = pd.read_csv(data_path)
     for model_i in range(1, model_time + 1):

@@ -231,3 +231,30 @@ def aceemd(extsignal, midsignal, alpha = 0.5):
     if isinstance(ext_up_envelopes, int) and isinstance(mid_up_envelopes, int) and isinstance(ext_down_envelopes, int) and isinstance(mid_down_envelopes, int):
         return signal, signal
     return ext_up_envelopes * (1-alpha) + mid_up_envelopes * alpha, ext_down_envelopes * (1-alpha) + mid_down_envelopes * alpha
+
+# Assuming noise is a list of Gaussian noise samples
+def snr(data, noise):
+  """
+  This function calculates the SNR (Signal-to-Noise Ratio) by adding the first 
+  Intrinsic Mode Function (IMF) of the noise to the data.
+
+  Args:
+      data: A numpy array representing the signal.
+
+  Returns:
+      A numpy array representing the data with noise added.
+  """
+
+  # Perform EMD on the noise to get IMFs
+  imfs = emd(noise)  # Assuming emd is defined earlier
+
+  # Extract the first IMF (IMF1)
+  if isinstance(imfs, tuple):
+      imf1 = imfs[0]
+  else:
+      imf1 = imfs
+
+  # Add IMF1 to the data
+  data_with_noise = data + imf1
+
+  return data_with_noise

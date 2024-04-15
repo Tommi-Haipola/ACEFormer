@@ -84,7 +84,7 @@ class ACEFormer(nn.Module):
                 )
             )
             self.distill.append(Distilling(embed_tmp))
-            #self.hidden_local.append(nn.Linear(unit_size, embed_tmp // 2))
+            self.temporal.append(nn.Linear(unit_size, embed_tmp // 2))
 
         # attention module
         self.attn = nn.ModuleList(
@@ -165,7 +165,7 @@ def test(model, test_data: EmdData, predict_size: int, device: str):
             stamp = torch.tensor(stamp).unsqueeze(0).int().to(device)
 
             true.append(true_data[-predict_size])
-            outputs, _, _ = model(data, stamp)
+            outputs = model(data)
             predict.append(outputs.reshape(-1)[-predict_size:].tolist())
 
     true, predict = test_data.anti_normalize_data(np.array(true), np.array(predict))
@@ -180,13 +180,13 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
 
     start_time = time.time()
     # product dataset for model
-    data_set = AllData(source_data=source_data, verify_size=50, test_size=100, unit_size=30, predict_size=5, emd_col=emd_col, result_col=result_col, back_num=backtest_num, data_type=EmdData)
+    data_set = AllData(source_data=source_data, verify_size=50, test_size=100, unit_size=64, predict_size=5, emd_col=emd_col, result_col=result_col, back_num=backtest_num, data_type=EmdData)
     former_train_set, former_verify_set, former_test_set = data_set.get_data()
     true_train_set, true_verify_set, true_test_set = data_set.get_not_normaliza_data()
 
     # create model
     print("create model")
-    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=16, unit_size=10, dis_layer=1, attn_layer=1, dropout=0.1, factor=2).to(device)
+    model = ACEFormer(data_dim=len(emd_col), embed_dim=64, forward_dim=16, unit_size=64, dis_layer=1, attn_layer=1, dropout=0.1, factor=5).to(device)
 
     train_true_set, train_predict_set = [], []
     verify_true_set, verify_predict_set = [], []
@@ -207,6 +207,10 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
         test_true_set.append(true)
         test_predict_set.append(predict)
 
+        print(true,predict)
+        np.savetxt("./result/true.csv",true,delimiter=',')
+        np.savetxt("./result/predict.csv",predict,delimiter=',')
+
     all_set_dict = {
         "true_train_set": true_train_set,
         "true_verify_set": true_verify_set,
@@ -224,6 +228,10 @@ def run_model(source_data: pd.DataFrame, index: int, device: str, backtest_num: 
     print("Save result to " + save_path.format(index) + ", spend time " + str((time.time() - start_time) // 60 // 60) + "h " + str((time.time() - start_time) // 60 % 60) + "min.")
 
     torch.save(model,save_path)
+
+def loadAndInference(data):
+    model = torch.load("./result/model_0")
+    print(model(data))
 
 if __name__ == "__main__":
     print('args : ', sys.argv)

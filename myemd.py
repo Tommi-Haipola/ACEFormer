@@ -261,7 +261,7 @@ def snr(data, noise):
 
 
 #calculate ACEEMD from base signal (includes snr)
-def ACEEMD_Base(source_data,imf_times=10,emd_type=0,alpha=0.5):
+def ACEEMD_Base(source_data,imf_times=40,emd_type=0,alpha=0.5):
 
     #  Gaussian noise
     noise_list = []

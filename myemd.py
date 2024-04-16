@@ -229,7 +229,7 @@ def aceemd(extsignal, midsignal, alpha = 0.5):
             break
 
     if isinstance(ext_up_envelopes, int) and isinstance(mid_up_envelopes, int) and isinstance(ext_down_envelopes, int) and isinstance(mid_down_envelopes, int):
-        return origin_signal, origin_signal
+        return extsignal, midsignal
     return ext_up_envelopes * (1-alpha) + mid_up_envelopes * alpha, ext_down_envelopes * (1-alpha) + mid_down_envelopes * alpha
 
 # Assuming noise is a sample of gaussian noise

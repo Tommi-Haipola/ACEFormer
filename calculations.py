@@ -1,17 +1,32 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import myemd
+import math as m
+import numpy as np
 
-predict_df = pd.read_csv('./result/predict.csv',header=None)
-true_df = pd.read_csv('./result/true.csv',header=None)
+df = pd.read_csv('./data/NDX100.csv')
 
+y1 = df['close'].to_numpy()
+y1 = y1[1245:1345]
+x = np.linspace(1,len(y1),len(y1))
+y = np.array([np.array([y1]).reshape((-1,1))])
 
-pred = predict_df.iloc[:,0].to_numpy()
-idx = true_df.index
-true = true_df.to_numpy()
-print(predict_df.iloc[:,0])
-print(true_df)
+print(y.shape)
+#'''
+k = np.array(myemd.ACEEMD_Base(y,emd_type=2))
 
-plt.plot(idx,pred)
-plt.plot(idx,true)
+l = myemd.emd(y1)
+#'''
+
+#'''
+plt.plot(x,y1)
+plt.plot(x,l[0])
+plt.plot(x,l[1])
 plt.show()
+#'''
 
+#'''
+plt.plot(x,y1)
+plt.plot(x,k[0].reshape((-1,)))
+plt.show()
+#'''

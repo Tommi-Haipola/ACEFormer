@@ -228,8 +228,8 @@ def aceemd(extsignal, midsignal, alpha = 0.5):
         if (abs(pass_zero - len(ext_peaks_max) - len(ext_peaks_min)) < 2) or imf_judge(extsignal, extsignal_old) or std_continue == continue_time:
             break
 
-    #if isinstance(ext_up_envelopes, int) and isinstance(mid_up_envelopes, int) and isinstance(ext_down_envelopes, int) and isinstance(mid_down_envelopes, int):
-        #return signal, signal
+    if isinstance(ext_up_envelopes, int) and isinstance(mid_up_envelopes, int) and isinstance(ext_down_envelopes, int) and isinstance(mid_down_envelopes, int):
+        return origin_signal, origin_signal
     return ext_up_envelopes * (1-alpha) + mid_up_envelopes * alpha, ext_down_envelopes * (1-alpha) + mid_down_envelopes * alpha
 
 # Assuming noise is a sample of gaussian noise
@@ -265,7 +265,7 @@ def ACEEMD_Base(source_data,imf_times=10,emd_type=0,alpha=0.5):
 
     #  Gaussian noise
     noise_list = []
-    win_len = signal.shape[-2]
+    win_len = source_data.shape[-2]
     for _ in range(imf_times // 2):
         noise = np.random.randn(win_len)
         n_up_envelopes, n_down_envelopes =  emd(noise)

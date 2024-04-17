@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import myemd
 import math as m
 import numpy as np
+from torch import Tensor
+from OneFormer import OneFormer
 
 normed = lambda x : (x-np.min(x))/(np.max(x)-np.min(x))
 
@@ -29,6 +31,13 @@ yk = np.concatenate([y1,y2,y3,y4],axis=1)
 
 y = np.array([yk])
 
+model = OneFormer()
+
+print(Tensor(y).size())
+
+#output from model:
+output = model(Tensor(y))
+
 print(y.shape)
 #'''
 k = np.array(myemd.ACEEMD_Base(y,emd_type=2,alpha=0.8))
@@ -50,3 +59,7 @@ for i in range(k.shape[2]):
     plt.plot(x,k[0][:,i])
     plt.show()
 #'''
+
+plt.plot(x,ys[0])
+plt.plot(x,output.detach().numpy()[0].reshape((-1,1)))
+plt.show()

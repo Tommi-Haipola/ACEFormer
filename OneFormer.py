@@ -22,7 +22,6 @@ from attnset import ProbabilityAttention, FullAttention
 from pretreatment import PositionalEmbedding, ExpandEmbedding
 from module import Distilling, CrossLayer
 
-
 class OneFormer(nn.Module):
 
     def __init__(
@@ -37,8 +36,8 @@ class OneFormer(nn.Module):
         
         self.layer = layers
 
-        ## data embedding -- nothing for now
-
+        ## data embedding
+        self.Embed = nn.Linear(4,embed_dimension)
         ## positional Embedding
         self.PosEmbedding = PositionalEncoding(embed_dimension,dropout)
         ## dropout
@@ -55,15 +54,17 @@ class OneFormer(nn.Module):
         # batch,length,depth
 
         # embed data
-        data_emb = data.norm()
-        pos = self.PosEmbedding(data)
-        embeded = self.dropout(data_emb + pos)
+        #data_emb = torch.layer_norm(data,normalized_shape=(140,4))
+        data_emb = self.Embed(data)
+        print(data_emb.size())
+        pos = self.PosEmbedding(data_emb)
+        embeded = self.dropout(pos)
 
         # attention
-        attention = self.attn(embeded)
+        attention = self.attn(embeded,embeded,embeded)
 
         # projection
-        output = self.full_connect(attention)
+        output = self.full_connect(attention[0])
 
         return output
 
@@ -85,5 +86,9 @@ class PositionalEncoding(nn.Module):
         Arguments:
             x: Tensor, shape ``[seq_len, batch_size, embedding_dim]``
         """
+
+        print("PE")
+        print(x.size())
+        print(self.pe[:x.size(0)].size())
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
